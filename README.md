@@ -1,2 +1,2 @@
-# Dota-Web-Scraping
-A personal project for web scraping on Dota 2 The International 10 tournament, along with data visualization
+# Valorant Game Predictor
+A personal project to predict a game of Valorant based on team agent roster and map, using professional games as the sample.
