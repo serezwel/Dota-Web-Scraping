@@ -6,6 +6,8 @@ import re
 #NEED TO IMPLEMENT MORE THAN BO1
 #NEED TO FIX FINDING WINNER
 
+"""For BO3, go to div class vm-stats-container -> get all vm-stats-game -> same thing with BO1"""
+
 #function to get team agents and result
 def get_match_data(match_url):
     match_data = []
@@ -23,11 +25,14 @@ def get_match_data(match_url):
     game_map = re.sub("[0-9]*:*[0-9]*:*[0-9]*", "", game_map)
     #Append map into match data
     match_data.append(game_map)
-    #get_winner = match_soup.find("div", attrs={"class" : "team mod-right"})
-    #if (get_winner.find("div", attrs={"class": "score "}).text == "13"):
-    #    match_data.append("Team 2")
-    #else:
-    #    match_data.append("Team 1")
+    get_team2score = match_soup.find("div", attrs={"class" : "team mod-right"})
+    get_team2score = get_team2score.find("div", class_ = "score")
+    get_team1score = match_soup.find("div", attrs={"class": "team"})
+    get_team1score = match_soup.find("div", class_= "score")
+    if (int(get_team2score.text) > int(get_team1score.text)):
+        match_data.append("Team 2")
+    else:
+        match_data.append("Team 1")
     return match_data
 
 
