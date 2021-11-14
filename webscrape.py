@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
+import sys
 
 #NEED TO IMPLEMENT MORE THAN BO1
 #NEED TO FIX FINDING WINNER
@@ -10,30 +11,34 @@ import re
 
 #function to get team agents and result
 def get_match_data(match_url):
+    game_data = []
     match_data = []
     page = requests.get(match_url)
     match_src = page.content
     match_soup = BeautifulSoup(match_src, 'lxml')
-    get_agents_tag = match_soup.find_all("td", attrs={"class" : "mod-agents"})
-    #Get 10 agents in the game
-    for agents in get_agents_tag:
-        match_data.append(agents.find("img").attrs["alt"])
-        match_data = match_data[:10]
-    get_map = match_soup.find("div", attrs={"class" : "map"})
-    #Clean map text
-    game_map = re.sub("\s+", "", get_map.text)
-    game_map = re.sub("[0-9]*:*[0-9]*:*[0-9]*", "", game_map)
-    #Append map into match data
-    match_data.append(game_map)
-    get_team2score = match_soup.find("div", attrs={"class" : "team mod-right"})
-    get_team2score = get_team2score.find("div", class_ = "score")
-    get_team1score = match_soup.find("div", attrs={"class": "team"})
-    get_team1score = match_soup.find("div", class_= "score")
-    if (int(get_team2score.text) > int(get_team1score.text)):
-        match_data.append("Team 2")
-    else:
-        match_data.append("Team 1")
-    return match_data
+    get_matches = match_soup.find_all("div", attrs = {"class": "vm-stats-game"})
+    for matches in get_matches:
+        get_agents_tag = matches.find_all("td", attrs={"class" : "mod-agents"})
+        #Get 10 agents in the game
+        for agents in get_agents_tag:
+            match_data.append(agents.find("img").attrs["alt"])
+        print(match_data)
+        get_map = matches.find("div", attrs={"class" : "map"})
+        #Clean map text
+        game_map = re.search("Split|Bind|Ascent|Icebox|Haven|Breeze", get_map.text).group()
+        #Append map into match data
+        match_data.append(game_map)
+        get_team2score = matches.find("div", attrs={"class" : "team mod-right"})
+        get_team2score = get_team2score.find("div", class_ = "score")
+        get_team1score = matches.find("div", attrs={"class": "team"})
+        get_team1score = get_team1score.find("div", class_= "score")
+        if (int(get_team2score.text) > int(get_team1score.text)):
+            match_data.append("Team 2")
+        else:
+            match_data.append("Team 1")
+        game_data.append(match_data)
+    
+    return game_data
 
 
 
@@ -49,11 +54,8 @@ for i in range(1, 2):
     src = result_page.content
     soup = BeautifulSoup(src, 'lxml')
     get_matches_div = soup.find_all("div", attrs={"class" : "wf-card"})[1:]
-    for matches_list in get_matches_div:
+    for div in get_matches_div:
+        matches_list = div.find_all('a')
         for match in matches_list:
-            try:
-                match_url = "https://www.vlr.gg" + match.attrs["href"]
-                match_data = get_match_data(match_url)
-                print(match_data)
-            except:
-                continue
+            match_url = "https://www.vlr.gg" + match.attrs["href"]
+            match_data = get_match_data(match_url)
