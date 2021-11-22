@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
-import sys
 
 #function to get team agents and result
 def get_match_data(match_url):
@@ -13,25 +12,29 @@ def get_match_data(match_url):
     get_matches = match_soup.find("div", attrs = {"class": "vm-stats-container"})
     get_matches = get_matches.find_all("div", attrs = {"data-game-id" : re.compile('[0-9]+')})
     for matches in get_matches:
-        match_data = [] 
-        get_agents_tag = matches.find_all("td", attrs={"class" : "mod-agents"})
-        #Get 10 agents in the game
-        for agents in get_agents_tag:
-            match_data.append(agents.find("img").attrs["alt"])
-        get_map = matches.find("div", attrs={"class" : "map"})
-        #Clean map text
-        game_map = re.search("Split|Bind|Ascent|Icebox|Haven|Breeze|Fracture", get_map.text).group()
-        #Append map into match data
-        match_data.append(game_map)
-        get_team2score = matches.find("div", attrs={"class" : "team mod-right"})
-        get_team2score = get_team2score.find("div", class_ = "score")
-        get_team1score = matches.find("div", attrs={"class": "team"})
-        get_team1score = get_team1score.find("div", class_= "score")
-        if (int(get_team2score.text) > int(get_team1score.text)):
-            match_data.append("Team 2")
-        else:
-            match_data.append("Team 1")
-        game_data.append(match_data)
+        match_data = []
+        try: 
+            get_agents_tag = matches.find_all("td", attrs={"class" : "mod-agents"})
+            #Get 10 agents in the game
+            for agents in get_agents_tag:
+                match_data.append(agents.find("img").attrs["alt"])
+            get_map = matches.find("div", attrs={"class" : "map"})
+            #Clean map text
+            game_map = re.search("Split|Bind|Ascent|Icebox|Haven|Breeze|Fracture", get_map.text).group()
+            #Append map into match data
+            match_data.append(game_map)
+            get_team2score = matches.find("div", attrs={"class" : "team mod-right"})
+            get_team2score = get_team2score.find("div", class_ = "score")
+            get_team1score = matches.find("div", attrs={"class": "team"})
+            get_team1score = get_team1score.find("div", class_= "score")
+            if (int(get_team2score.text) > int(get_team1score.text)):
+                match_data.append("Team 2")
+            else:
+                match_data.append("Team 1")
+            game_data.append(match_data)
+            print(match_data)
+        except AttributeError:
+            continue
     return game_data
 
 
@@ -43,7 +46,7 @@ match_details = ["Team1Agent1", "Team1Agent2", "Team1Agent3", "Team1Agent4", "Te
 match_df = pd.DataFrame()
 #loop through pages
 
-for i in range(1, 2):
+for i in range(1, 50):
     url = "https://www.vlr.gg/matches/results/?page=" + str(i)
     result_page = requests.get(url)
     src = result_page.content
@@ -57,3 +60,4 @@ for i in range(1, 2):
             match_df = match_df.append(match_data, ignore_index = True)
 match_df.columns = match_details
 print(match_df)
+match_df.to_csv("matches.csv", index=False)
