@@ -32,7 +32,6 @@ def get_match_data(match_url):
             else:
                 match_data.append("Team 1")
             game_data.append(match_data)
-            print(match_data)
         except AttributeError:
             continue
     return game_data
@@ -46,7 +45,7 @@ match_details = ["Team1Agent1", "Team1Agent2", "Team1Agent3", "Team1Agent4", "Te
 match_df = pd.DataFrame()
 #loop through pages
 
-for i in range(1, 50):
+for i in range(1, 151):
     url = "https://www.vlr.gg/matches/results/?page=" + str(i)
     result_page = requests.get(url)
     src = result_page.content
@@ -58,6 +57,7 @@ for i in range(1, 50):
             match_url = "https://www.vlr.gg" + match.attrs["href"]
             match_data = get_match_data(match_url)
             match_df = match_df.append(match_data, ignore_index = True)
+    print(f"Opening page: {i}")
 match_df.columns = match_details
 print(match_df)
 match_df.to_csv("matches.csv", index=False)
