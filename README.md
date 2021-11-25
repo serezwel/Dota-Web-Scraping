@@ -1,2 +1,2 @@
-# Valorant Game Predictor
-A personal project to predict a game of Valorant based on team agent roster and map, using professional games as the sample.
+# Valorant Map Analysis
+A personal project to analyze which agents are the best in each map by scraping thousands of pro matches of Valorant from vlr.gg
